@@ -4,8 +4,6 @@ core/email_builder.py
 Builds email subject lines and bodies from job DataFrames.
 """
 
-from datetime import date
-
 import pandas as pd
 
 from config.settings import (
@@ -26,7 +24,7 @@ def build_subject(job_count: int) -> str:
     return f"[Action Required] Construction Pending — {job_count} {word} Awaiting Resolution"
 
 
-def build_body(jobs: pd.DataFrame) -> str:
+def build_body(jobs: pd.DataFrame, poc: str = "") -> str:
     n    = len(jobs)
     word = "job" if n == 1 else "jobs"
 
@@ -44,16 +42,11 @@ def build_body(jobs: pd.DataFrame) -> str:
     table = "\n".join([header, divider] + rows)
 
     return (
-        f"Hello,\n\n"
-        f"You have {n} {word} currently flagged as Construction Pending "
-        f"that require your attention.\n"
-        f"Please review the details below and provide an update or coordinate "
-        f"resolution at your earliest convenience.\n\n"
+        f"Hi {poc},\n\n"
+        f"Please see the following construction action items for this week:\n\n"
         f"{'─' * 95}\n{table}\n{'─' * 95}\n\n"
-        f"If a Resolve Date is marked as past due, please escalate or confirm "
-        f"a revised target date.\n\n"
-        f"Thank you,\nAutomated Job Tracker\n"
-        f"(Generated: {date.today().strftime('%B %d, %Y')})\n"
+        f"Let me know if you have any questions.\n\n"
+        f"Thanks,\nMatt\n"
     )
 
 
@@ -65,7 +58,7 @@ def build_previews(grouped: dict) -> dict:
     return {
         poc: {
             "subject": build_subject(len(jobs)),
-            "body":    build_body(jobs),
+            "body":    build_body(jobs, poc),
         }
         for poc, jobs in grouped.items()
     }
